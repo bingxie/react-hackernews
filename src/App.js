@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { sortBy } from "lodash";
 import "./App.css";
 
 const DEFAULT_QUERY = "react";
@@ -23,6 +24,14 @@ const Button = ({ onClick, className, children }) => (
   </button>
 );
 
+const SORTS = {
+  NONE: list => list,
+  TITLE: list => sortBy(list, "title"),
+  AUTHOR: list => sortBy(list, "author"),
+  COMMENTS: list => sortBy(list, "num_comments").reverse(),
+  POINTS: list => sortBy(list, "points").reverse()
+};
+
 Button.defaultProps = {
   className: ""
 };
@@ -43,7 +52,8 @@ class App extends Component {
       searchKey: "",
       searchTerm: DEFAULT_QUERY,
       error: null,
-      isLoading: false
+      isLoading: false,
+      sortKey: "NONE"
     };
   }
 
@@ -115,8 +125,19 @@ class App extends Component {
     this.setState({ searchTerm: event.target.value });
   };
 
+  onSort = sortKey => {
+    this.setState({ sortKey });
+  };
+
   render() {
-    const { searchTerm, results, searchKey, error, isLoading } = this.state;
+    const {
+      searchTerm,
+      results,
+      searchKey,
+      error,
+      isLoading,
+      sortKey
+    } = this.state;
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
@@ -138,7 +159,12 @@ class App extends Component {
             <p>Something went wrong</p>
           </div>
         ) : (
-          <Table list={list} onDismiss={this.onDismiss} />
+          <Table
+            list={list}
+            sortKey={sortKey}
+            onSort={this.onSort}
+            onDismiss={this.onDismiss}
+          />
         )}
         <div className="interactions">
           <ButtonWithLoading
@@ -193,9 +219,40 @@ const largeColumn = { width: "40%" };
 const midColumn = { width: "30%" };
 const smallColumn = { width: "10%" };
 
-const Table = ({ list, onDismiss }) => (
+const Sort = ({ sortKey, onSort, children }) => (
+  <Button onClick={() => onSort(sortKey)} className="button-inline">
+    {children}
+  </Button>
+);
+
+const Table = ({ list, sortKey, onSort, onDismiss }) => (
   <div className="table">
-    {list.map(item => (
+    <div className="table-header">
+      <span style={largeColumn}>
+        <Sort sortKey={"TITLE"} onSort={onSort}>
+          {" "}
+          Title
+        </Sort>
+      </span>
+      <span style={midColumn}>
+        <Sort sortKey={"AUTHOR"} onSort={onSort}>
+          Author
+        </Sort>
+      </span>
+      <span style={smallColumn}>
+        <Sort sortKey={"COMMENTS"} onSort={onSort}>
+          Comments
+        </Sort>
+      </span>
+      <span style={smallColumn}>
+        <Sort sortKey={"POINTS"} onSort={onSort}>
+          {" "}
+          Points
+        </Sort>
+      </span>
+      <span style={smallColumn}>Archive</span>
+    </div>
+    {SORTS[sortKey](list).map(item => (
       <div key={item.objectID} className="table-row">
         <span style={smallColumn}>{item.created_at}</span>
         <span style={largeColumn}>
