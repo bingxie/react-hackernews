@@ -26,14 +26,12 @@ exports[`App has a valid snapshot 1`] = `
   <div
     className="table"
   />
-  <div>
-    <button
-      className=""
-      onClick={[Function]}
-      type="button"
-    >
-      More
-    </button>
+  <div
+    className="interactions"
+  >
+    <div>
+      Loading ...
+    </div>
   </div>
 </div>
 `;

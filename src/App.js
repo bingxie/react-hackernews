@@ -14,6 +14,27 @@ const PARAM_HPP = "hitsPerPage=";
 
 const Loading = () => <div>Loading ...</div>;
 
+const withLoading = Component => ({ isLoading, ...rest }) =>
+  isLoading ? <Loading /> : <Component {...rest} />;
+
+const Button = ({ onClick, className, children }) => (
+  <button type="button" onClick={onClick} className={className}>
+    {children}
+  </button>
+);
+
+Button.defaultProps = {
+  className: ""
+};
+
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired
+};
+
+const ButtonWithLoading = withLoading(Button);
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -119,16 +140,13 @@ class App extends Component {
         ) : (
           <Table list={list} onDismiss={this.onDismiss} />
         )}
-        <div>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <Button
-              onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
-            >
-              More
-            </Button>
-          )}
+        <div className="interactions">
+          <ButtonWithLoading
+            isLoading={isLoading}
+            onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
+          >
+            More
+          </ButtonWithLoading>
         </div>
       </div>
     );
@@ -210,22 +228,6 @@ Table.propTypes = {
     })
   ).isRequired,
   onDismiss: PropTypes.func.isRequired
-};
-
-const Button = ({ onClick, className, children }) => (
-  <button type="button" onClick={onClick} className={className}>
-    {children}
-  </button>
-);
-
-Button.defaultProps = {
-  className: ""
-};
-
-Button.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  className: PropTypes.string,
-  children: PropTypes.node.isRequired
 };
 
 export default App;
